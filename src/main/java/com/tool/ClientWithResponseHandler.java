@@ -156,14 +156,14 @@ public class ClientWithResponseHandler {
             EntityUtils.consume(entity);
             //释放链接
             response.close();
-            return result;
         }catch (Exception e){
 
-            return "请求失败，再试一遍";
+            e.printStackTrace();
         }
         finally{
             client.close();
         }
+        return result;
     }
 
 }
