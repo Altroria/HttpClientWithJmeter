@@ -18,7 +18,7 @@ public class HttpClientForJmeter implements JavaSamplerClient{
     //URLNAME 就是在图形化界面当中显示的变量名称
     private static final String isGateway = "isGateway";
     //是否过网关，0是过，1是不过
-    private static final String DEFAULTisGateway = "1";
+    private static final String DEFAULTisGateway = "0";
 
     private static final String URLNAME = "URL";
     //设置界面当中默认显示的变量的值
@@ -93,6 +93,7 @@ public class HttpClientForJmeter implements JavaSamplerClient{
      */
     public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
         SampleResult result = new SampleResult();
+//        ClientWithResponseHandler Client = new ClientWithResponseHandler();
         ClientWithResponseHandler Client = new ClientWithResponseHandler();
         result.sampleStart();//标记事务的开始
         getUrl testurl = new getUrl();
@@ -119,7 +120,6 @@ public class HttpClientForJmeter implements JavaSamplerClient{
                             url = inputUrl+inputPath;
                             break;
                     }
-                    System.out.println(url);
                     resultData = Client.doPost(url, inputbody);
                     break;
                 default:
@@ -138,7 +138,6 @@ public class HttpClientForJmeter implements JavaSamplerClient{
         }
         if (resultData == "请求失败，再试一遍" || resultData == "请求方法有误,目前支持GET,POST,注意大写"){
             result.setSuccessful(false);
-            System.out.println(resultData);
         }else {
             result.setSuccessful(true);//告诉查看结果树访问是否成功
         }
