@@ -7,11 +7,13 @@ import java.security.cert.CertificateException;
 
 
 import org.apache.http.HttpEntity;
+import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -20,6 +22,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
+import org.apache.log.Logger;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -34,9 +37,8 @@ public class ClientWithResponseHandler {
      * @throws NoSuchAlgorithmException
      * @throws KeyManagementException
      */
-    public static SSLContext createIgnoreVerifySSL() throws NoSuchAlgorithmException, KeyManagementException {
-        SSLContext sc = SSLContext.getInstance("SSLv3");
-
+    public static CloseableHttpClient createIgnoreVerifySSLClient() throws NoSuchAlgorithmException, KeyManagementException {
+        SSLContext sslcontext = SSLContext.getInstance("SSLv3");
         // 实现一个X509TrustManager接口，用于绕过验证，不用修改里面的方法
         X509TrustManager trustManager = new X509TrustManager() {
             @Override
@@ -57,8 +59,31 @@ public class ClientWithResponseHandler {
             }
         };
 
-        sc.init(null, new TrustManager[] { trustManager }, null);
-        return sc;
+        sslcontext.init(null, new TrustManager[] { trustManager }, null);
+
+        //设置协议http和https对应的处理socket链接工厂的对象
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.INSTANCE)
+                .register("https", new SSLConnectionSocketFactory(sslcontext))
+                .build();
+        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+
+        //创建自定义的httpclient对象
+        CloseableHttpClient client = HttpClients.custom()
+                .setConnectionManager(connManager)
+
+                .setRetryHandler((exception, executionCount, context) -> {
+                    if (executionCount > 2) {
+                        return false;
+                    }
+                    if (exception instanceof NoHttpResponseException     //NoHttpResponseException 重试
+                    ) {
+                        return true;
+                    }
+                    return false;
+                })
+                .build();
+        return client;
     }
 
     /**
@@ -72,20 +97,7 @@ public class ClientWithResponseHandler {
         String result = "";
 
         //采用绕过验证的方式处理https请求
-        SSLContext sslcontext = createIgnoreVerifySSL();
-
-        //设置协议http和https对应的处理socket链接工厂的对象
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.INSTANCE)
-                .register("https", new SSLConnectionSocketFactory(sslcontext))
-                .build();
-        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-        HttpClients.custom().setConnectionManager(connManager);
-
-
-        //创建自定义的httpclient对象
-        CloseableHttpClient client = HttpClients.custom().setConnectionManager(connManager).build();
-        //CloseableHttpClient client = HttpClients.createDefault();
+        CloseableHttpClient client = createIgnoreVerifySSLClient();
 
         try{
             //创建get方式请求对象
@@ -93,6 +105,7 @@ public class ClientWithResponseHandler {
 
             //指定报文头Content-type、User-Agent
             get.setHeader("Content-type", "application/json");
+            get.setHeader("Connection", "Keep-Alive");
 
             //执行请求操作，并拿到结果（同步阻塞）
             CloseableHttpResponse response = client.execute(get);
@@ -125,23 +138,14 @@ public class ClientWithResponseHandler {
     public String doPost(String url, String postBody) throws Exception {
         String result = "";
         //采用绕过验证的方式处理https请求
-        SSLContext sslcontext = createIgnoreVerifySSL();
-        //设置协议http和https对应的处理socket链接工厂的对象
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.INSTANCE)
-                .register("https", new SSLConnectionSocketFactory(sslcontext))
-                .build();
-        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-        HttpClients.custom().setConnectionManager(connManager);
+        CloseableHttpClient client = createIgnoreVerifySSLClient();
 
-        //创建自定义的httpclient对象
-        CloseableHttpClient client = HttpClients.custom().setConnectionManager(connManager).build();
-        //CloseableHttpClient client = HttpClients.createDefault();
         try{
             //创建post方式请求对象
             HttpPost httpPost = new HttpPost(url);
             //指定报文头Content-type、User-Agent
             httpPost.setHeader("Content-type", "application/json");
+            httpPost.setHeader("Connection", "Keep-Alive");
             //设置body
             httpPost.setEntity(new StringEntity(postBody, "utf-8"));
 
@@ -157,7 +161,6 @@ public class ClientWithResponseHandler {
             //释放链接
             response.close();
         }catch (Exception e){
-
             e.printStackTrace();
         }
         finally{
