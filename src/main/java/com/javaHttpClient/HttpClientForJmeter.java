@@ -22,15 +22,15 @@ public class HttpClientForJmeter implements JavaSamplerClient{
 
     private static final String URLNAME = "URL";
     //设置界面当中默认显示的变量的值
-    private static final String DEFAULTURL = "https://api-zhengzhou-1.cmecloud.cn:8443";
+    private static final String DEFAULTURL = "${url}";
 
     //用户AccessKey
     private static final String accessKeyNAME = "accessKey";
-    private static final String DEFAULTaccessKey = "c4bf2bce0bd4468c92adbdcf6dde48ab";
+    private static final String DEFAULTaccessKey = "${accessKey}";
 
     //用户SecretKey
     private static final String secretKeyNAME = "secretKey";
-    private static final String DEFAULTsecretKey = "3ff3cb1cc81f4e1e9b32ffbd248ee637";
+    private static final String DEFAULTsecretKey = "${secretKey}";
 
     //API服务的路径
     private static final String pathNAME = "path";
