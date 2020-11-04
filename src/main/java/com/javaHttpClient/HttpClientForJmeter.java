@@ -1,9 +1,13 @@
 package com.javaHttpClient;
 import com.tool.*;
 import org.apache.jmeter.config.Arguments;
+import org.apache.jmeter.functions.SamplerName;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
-import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.report.core.SampleBuilder;
+import org.apache.jmeter.report.core.SampleMetaDataParser;
+import org.apache.jmeter.report.core.SamplePredicate;
+import org.apache.jmeter.samplers.*;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
@@ -77,13 +81,13 @@ public class HttpClientForJmeter implements JavaSamplerClient{
      * @param javaSamplerContext
      */
     public void setupTest(JavaSamplerContext javaSamplerContext) {
-        inputGateway = javaSamplerContext.getParameter(isGateway,DEFAULTisGateway);
-        inputUrl = javaSamplerContext.getParameter(URLNAME,DEFAULTURL);
-        inputAccessKey = javaSamplerContext.getParameter(accessKeyNAME,DEFAULTaccessKey);
-        inputSecretKey = javaSamplerContext.getParameter(secretKeyNAME,DEFAULTsecretKey);
-        inputPath = javaSamplerContext.getParameter(pathNAME,DEFAULTpath);
-        inputmethod = javaSamplerContext.getParameter(methodNAME,DEFAULTmethod);
-        inputbody = javaSamplerContext.getParameter(body,DEFAULTbody);
+        inputGateway = javaSamplerContext.getParameter(isGateway,DEFAULTisGateway).replace(" ","");
+        inputUrl = javaSamplerContext.getParameter(URLNAME,DEFAULTURL).replace(" ","");
+        inputAccessKey = javaSamplerContext.getParameter(accessKeyNAME,DEFAULTaccessKey).replace(" ","");
+        inputSecretKey = javaSamplerContext.getParameter(secretKeyNAME,DEFAULTsecretKey).replace(" ","");
+        inputPath = javaSamplerContext.getParameter(pathNAME,DEFAULTpath).replace(" ","");
+        inputmethod = javaSamplerContext.getParameter(methodNAME,DEFAULTmethod).replace(" ","");
+        inputbody = javaSamplerContext.getParameter(body,DEFAULTbody).replace(" ","");
     }
 
     /**
@@ -93,7 +97,6 @@ public class HttpClientForJmeter implements JavaSamplerClient{
      */
     public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
         SampleResult result = new SampleResult();
-//        ClientWithResponseHandler Client = new ClientWithResponseHandler();
         ClientWithResponseHandler Client = new ClientWithResponseHandler();
         result.sampleStart();//标记事务的开始
         getUrl testurl = new getUrl();
@@ -111,6 +114,17 @@ public class HttpClientForJmeter implements JavaSamplerClient{
                     }
                     resultData = Client.doGet(url);
                     break;
+                case "DELETE":
+                    switch (inputGateway){
+                        case "0":
+                            url = testurl.getRequestUrl(inputAccessKey, inputSecretKey, inputUrl, inputPath, inputmethod,inputbody);
+                            break;
+                        case "1":
+                            url = inputUrl+inputPath;
+                            break;
+                    }
+                    resultData = Client.doDelete(url);
+                    break;
                 case "POST":
                     switch (inputGateway){
                         case "0":
@@ -122,11 +136,21 @@ public class HttpClientForJmeter implements JavaSamplerClient{
                     }
                     resultData = Client.doPost(url, inputbody);
                     break;
+                case "PUT":
+                    switch (inputGateway){
+                        case "0":
+                            url = testurl.getRequestUrl(inputAccessKey, inputSecretKey, inputUrl, inputPath, inputmethod,null);
+                            break;
+                        case "1":
+                            url = inputUrl+inputPath;
+                            break;
+                    }
+                    resultData = Client.doPut(url, inputbody);
+                    break;
                 default:
-                    resultData = "请求方法有误,目前支持GET,POST,注意大写";
+                    resultData = "请求方法有误,目前支持GET,POST,PUT,DELETE注意大写";
                     break;
             }
-
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
@@ -142,12 +166,15 @@ public class HttpClientForJmeter implements JavaSamplerClient{
             result.setSuccessful(true);//告诉查看结果树访问是否成功
         }
 //        result.setSampleLabel("自定义java请求访问");
+        result.setResponseHeaders("a");
+        result.setRequestHeaders("b");
+
+
         result.setResponseData(resultData,"utf-8");
         result.setDataType(SampleResult.TEXT);
+
         return result;
     }
-
-
     /**
      * 这个方法就是来做一些收尾的工作的。
      * @param javaSamplerContext

@@ -7,6 +7,14 @@
     <groupId>org.example</groupId>
     <artifactId>httpClinet_Jmeter</artifactId>
     <version>V1.0</version>
+    <distributionManagement>
+        <repository>
+            <!--必须与 settings.xml 的 id 一致-->
+            <id>ceshi-quanliangceshi-maven</id>
+            <name>maven</name>
+            <url>http://ceshi-maven.pkg.devtool.cmecloud.cn/repository/quanliangceshi/maven/</url>
+        </repository>
+    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>commons-codec</groupId>
