@@ -1,12 +1,12 @@
 package com.javaHttpClient;
 import com.tool.*;
 import org.apache.jmeter.config.Arguments;
-import org.apache.jmeter.functions.SamplerName;
+//import org.apache.jmeter.functions.SamplerName;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
-import org.apache.jmeter.report.core.SampleBuilder;
-import org.apache.jmeter.report.core.SampleMetaDataParser;
-import org.apache.jmeter.report.core.SamplePredicate;
+//import org.apache.jmeter.report.core.SampleBuilder;
+//import org.apache.jmeter.report.core.SampleMetaDataParser;
+//import org.apache.jmeter.report.core.SamplePredicate;
 import org.apache.jmeter.samplers.*;
 
 import java.io.UnsupportedEncodingException;
@@ -88,6 +88,7 @@ public class HttpClientForJmeter implements JavaSamplerClient{
         inputPath = javaSamplerContext.getParameter(pathNAME,DEFAULTpath).replace(" ","");
         inputmethod = javaSamplerContext.getParameter(methodNAME,DEFAULTmethod).replace(" ","");
         inputbody = javaSamplerContext.getParameter(body,DEFAULTbody).replace(" ","");
+
     }
 
     /**
