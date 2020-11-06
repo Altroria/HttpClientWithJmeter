@@ -8,9 +8,7 @@ import java.security.cert.CertificateException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NoHttpResponseException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.*;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectTimeoutException;
@@ -152,6 +150,86 @@ public class ClientWithResponseHandler {
 
             //执行请求操作，并拿到结果（同步阻塞）
             CloseableHttpResponse response = client.execute(httpPost);
+            //获取结果实体
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                //按指定编码转换结果实体为String类型
+                result = EntityUtils.toString(entity, "UTF-8");
+            }
+            EntityUtils.consume(entity);
+            //释放链接
+            response.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        finally{
+            client.close();
+        }
+        return result;
+    }
+
+    /**
+     * Put请求
+     * @param url
+     * @param postBody
+     * @return
+     * @throws Exception
+     */
+    public String doPut(String url, String postBody) throws Exception {
+        String result = "";
+        //采用绕过验证的方式处理https请求
+        CloseableHttpClient client = createIgnoreVerifySSLClient();
+
+        try{
+            //创建post方式请求对象
+            HttpPut httpPut = new HttpPut(url);
+            //指定报文头Content-type、User-Agent
+            httpPut.setHeader("Content-type", "application/json");
+            httpPut.setHeader("Connection", "Keep-Alive");
+            //设置body
+            httpPut.setEntity(new StringEntity(postBody, "utf-8"));
+
+            //执行请求操作，并拿到结果（同步阻塞）
+            CloseableHttpResponse response = client.execute(httpPut);
+            //获取结果实体
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                //按指定编码转换结果实体为String类型
+                result = EntityUtils.toString(entity, "UTF-8");
+            }
+            EntityUtils.consume(entity);
+            //释放链接
+            response.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        finally{
+            client.close();
+        }
+        return result;
+    }
+
+    /**
+     * Delete请求
+     * @param url
+     * @param
+     * @return
+     * @throws Exception
+     */
+    public String doDelete(String url) throws Exception {
+        String result = "";
+        //采用绕过验证的方式处理https请求
+        CloseableHttpClient client = createIgnoreVerifySSLClient();
+
+        try{
+            //创建post方式请求对象
+            HttpDelete httpDelete = new HttpDelete(url);
+            //指定报文头Content-type、User-Agent
+            httpDelete.setHeader("Content-type", "application/json");
+            httpDelete.setHeader("Connection", "Keep-Alive");
+
+            //执行请求操作，并拿到结果（同步阻塞）
+            CloseableHttpResponse response = client.execute(httpDelete);
             //获取结果实体
             HttpEntity entity = response.getEntity();
             if (entity != null) {
