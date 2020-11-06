@@ -1,6 +1,8 @@
-com\tool\ClientWithResponseHandler$1.class
-com\tool\getUrl.class
-com\functions\ImageToBase64Function.class
-com\tool\ImageToBase64.class
-com\tool\ClientWithResponseHandler.class
-com\javaHttpClient\HttpClientForJmeter.class
+com/javaHttpClient/HttpClientForJmeter.class
+com/tool/ImageToBase64.class
+com/tool/ClientWithResponseHandler$1.class
+com/functions/ImageToBase64Function.class
+com/javaHttpClient/MyPluginSampler.class
+com/tool/getUrl.class
+com/javaHttpClient/MypluginGUI.class
+com/tool/ClientWithResponseHandler.class
