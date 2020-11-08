@@ -6,6 +6,7 @@ import com.chinamobile.cmss.rpc.sdk.request.FaceCertificationRequest;
 import com.chinamobile.cmss.rpc.sdk.request.FaceComparisonRequest;
 import com.chinamobile.cmss.rpc.sdk.request.FaceSilentDetectionRequest;
 import com.chinamobile.cmss.rpc.sdk.request.IdCardVerificationRequest;
+import com.chinamobile.cmss.rpc.sdk.response.FaceCertificationResponse;
 import com.chinamobile.cmss.rpc.sdk.response.RpCertResponse;
 
 import java.util.HashMap;
@@ -27,10 +28,11 @@ public class test {
         //身份信息查验接口 /api/rp-cert/v1/id-cards/verifications
         IdCardVerificationRequest request = new IdCardVerificationRequest();
 
-        request.setId("321281199502053539");
-        request.setName("孙浩");
-        RpCertResponse response = client.execute(request);
-        System.out.println(response.getResult());
+//        request.setId("321281199502053539");
+//        request.setName("孙浩");
+        request1.setMessage("mess");
+        FaceCertificationResponse response = client.execute(request1);
+        System.out.println(response.getMessage());
         System.out.println(response.getErrorCode());
         System.out.println(response.getErrorMessage());
     }
